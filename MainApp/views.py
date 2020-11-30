@@ -27,4 +27,11 @@ def snippets_page(request):
     return render(request, 'pages/view_snippets.html', context)
 
 def snippet(request, snippet_id):
-    pass
+    context = get_base_context(request, 'Страница сниппета')
+    try:
+        snippet = Snippet.objects.get(id=snippet_id)
+    except Snippet.DoesNotExist:
+        raise  Http404
+    
+    context["snippet"] = snippet
+    return render(request, 'pages/snippet.html', context)
