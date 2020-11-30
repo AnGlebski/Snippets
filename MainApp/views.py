@@ -1,13 +1,16 @@
 from django.http import Http404
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, HttpResponse
 from MainApp.models import Snippet
+from MainApp.forms import SnippetForm
 
 
 def get_base_context(request, pagename):
     return {
         'pagename': pagename
     }
-
+def thanks(request):
+    context = get_base_context(request, 'Thanks!!!')
+    return render(request, 'pages/thanks.html', context)
 
 def index_page(request):
     context = get_base_context(request, 'PythonBin')
@@ -15,8 +18,22 @@ def index_page(request):
 
 
 def add_snippet_page(request):
-    context = get_base_context(request, 'Добавление нового сниппета')
-    return render(request, 'pages/add_snippet.html', context)
+    if request.method == "GET":
+        context = get_base_context(request, 'Добавление нового сниппета')
+        form = SnippetForm()
+        context["form"] = form
+        return render(request, 'pages/add_snippet.html', context)
+    elif request.method == "POST":
+        form = SnippetForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('/thanks')
+        context = get_base_context(request, 'Добавление нового сниппета')
+        form = SnippetForm(request.POST)
+        print("errors = ", form.errors)
+        context["form"] = form
+        return render(request, 'pages/add_snippet.html', context)
+
 
 
 def snippets_page(request):
