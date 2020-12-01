@@ -2,6 +2,7 @@ from django.http import Http404
 from django.shortcuts import render, redirect, HttpResponse
 from MainApp.models import Snippet
 from MainApp.forms import SnippetForm
+from django.contrib import auth
 
 
 def get_base_context(request, pagename):
@@ -26,7 +27,10 @@ def add_snippet_page(request):
     elif request.method == "POST":
         form = SnippetForm(request.POST)
         if form.is_valid():
-            form.save()
+            if request.user.is_authenticated:
+                snippet = form.save(commit=False)
+                snippet.user = request.user
+                snippet.save()
             return redirect('/thanks')
         context = get_base_context(request, 'Добавление нового сниппета')
         form = SnippetForm(request.POST)
@@ -52,3 +56,30 @@ def snippet(request, snippet_id):
     
     context["snippet"] = snippet
     return render(request, 'pages/snippet.html', context)
+
+
+def login_page(request):
+    context = get_base_context(request, "Авторизация")
+    return render(request, 'pages/login.html', context)
+
+
+def login(request):
+    if request.method == "POST":
+        username = request.POST["username"]
+        password = request.POST["password"]
+        # print(username, password)
+        user = auth.authenticate(request, username=username, password=password)
+        if user:
+            auth.login(request, user)
+            return redirect('/')
+
+        errors = ["Некоректные данные", ]   
+        context = get_base_context(request, "Авторизация")
+        context['errors'] = errors
+        context['username'] = username
+        return render(request, 'pages/login.html', context)
+
+
+def logout(request):
+    auth.logout(request)
+    return redirect('/login/')

@@ -22,9 +22,13 @@ from MainApp import views
 urlpatterns = [
     path('', views.index_page, name="main_page"),
     path('thanks/', views.thanks),
+    path('logout/', views.logout),
+    path('login/', views.login_page), # --> login.html
+    path('auth/', views.login), # <-- login form DATA
     path('snippet/add', views.add_snippet_page, name="snippet_add"),
     path('snippets/list', views.snippets_page, name="snippet_list"),
     path('snippet/<int:snippet_id>', views.snippet, name="snippet"),
+
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 
